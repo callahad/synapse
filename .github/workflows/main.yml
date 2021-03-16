@@ -8,6 +8,10 @@ jobs:
     strategy:
       matrix:
         python-version: ['3.5', '3.6', '3.7', '3.8', '3.9']
+        toxenv: ['py,combine']
+        include:
+          - python-version: '3.9'
+            toxenv: 'py-noextras,combine'
 
     steps:
 
@@ -25,6 +29,7 @@ jobs:
       run: python -m pip install tox
 
     - name: Test with tox
-      run: tox -e py,combine
+      run: tox
       env:
           TRIAL_FLAGS: "--jobs=2"
+          TOXENV: ${{ matrix.toxenv }}
