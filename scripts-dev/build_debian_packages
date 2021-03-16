@@ -82,6 +82,7 @@ class Builder(object):
         # first build a docker image for the build environment
         subprocess.check_call([
             "docker", "build",
+            "--platform=linux/amd64",
             "--tag", "dh-venv-builder:" + tag,
             "--build-arg", "distro=" + dist,
             "-f", "docker/Dockerfile-dhvirtualenv",
@@ -95,6 +96,7 @@ class Builder(object):
         # then run the build itself
         subprocess.check_call([
             "docker", "run",
+            "--platform=linux/amd64",
             "--rm",
             "--name", container_name,
             "--volume=" + projdir + ":/synapse/source:ro",
