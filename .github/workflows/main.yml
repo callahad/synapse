@@ -4,21 +4,40 @@ on: [push, pull_request]
 
 jobs:
   trial:
-    if: false # Skip these for now
     runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: ['3.5', '3.6', '3.7', '3.8', '3.9']
-        toxenv: ['py,combine']
+        database: ['sqlite']
         include:
+          # Newest Python without optional deps
           - python-version: '3.9'
             toxenv: 'py-noextras,combine'
+
+          # Oldest Python with PostgreSQL
+          - python-version: '3.5'
+            database: 'postgres'
+            postgres-version: 9.5
+
+          # Newest Python with PostgreSQL
+          - python-version: '3.9'
+            database: 'postgres'
+            postgres-version: 13
 
     steps:
     - uses: actions/checkout@v2
 
     - name: Install required Debian packages
       run: sudo apt-get -qq install xmlsec1
+
+    - name: Set up PostgreSQL ${{ matrix.postgres-version }}
+      if: ${{ matrix.postgres-version }}
+      uses: Softwarepark/postgresql-action@v2
+      with:
+        postgresql version: ${{ matrix.postgres-version }}
+        postgresql db: 'postgres'
+        postgresql user: 'postgres'
+        postgresql password: 'postgres'
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
@@ -28,11 +47,19 @@ jobs:
     - name: Install Tox
       run: python -m pip install tox
 
+    - name: Await PostgreSQL
+      if: ${{ matrix.postgres-version }}
+      timeout-minutes: 2
+      run: until pg_isready -h localhost; do sleep 1; done
+
     - name: Test with tox
-      run: tox
+      run: tox -e py,combine
       env:
         TRIAL_FLAGS: "--jobs=2"
-        TOXENV: ${{ matrix.toxenv }}
+        SYNAPSE_POSTGRES: ${{ matrix.database == 'postgres' || '' }}
+        SYNAPSE_POSTGRES_HOST: localhost
+        SYNAPSE_POSTGRES_USER: postgres
+        SYNAPSE_POSTGRES_PASSWORD: postgres
 
   trial-olddeps:
     runs-on: ubuntu-latest
