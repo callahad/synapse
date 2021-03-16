@@ -3,7 +3,8 @@ name: CI
 on: [push, pull_request]
 
 jobs:
-  twisted-trial:
+  trial:
+    if: false # Skip these for now
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -12,7 +13,6 @@ jobs:
         include:
           - python-version: '3.9'
             toxenv: 'py-noextras,combine'
-            foo: 'bar'
 
     steps:
     - uses: actions/checkout@v2
@@ -33,3 +33,15 @@ jobs:
       env:
           TRIAL_FLAGS: "--jobs=2"
           TOXENV: ${{ matrix.toxenv }}
+
+  trial-olddeps:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Test with old deps
+      uses: docker://ubuntu:xenial  # For old python and sqlite
+      with:
+        workdir: /github/workspace
+        entrypoint: .buildkite/scripts/test_old_deps.sh
+        env: "TRIAL_FLAGS:--jobs=2"
