@@ -4,10 +4,12 @@ on: [push, pull_request]
 
 jobs:
   trial:
+    # Only run PyPy tests if the branch name includes 'pypy'
+    if: ${{ !contains(matrix.python-version, 'pypy') || contains(github.ref, 'pypy') }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.5', '3.6', '3.7', '3.8', '3.9']
+        python-version: ['3.5', '3.6', '3.7', '3.8', '3.9', 'pypy-3.6']
         database: ['sqlite']
         include:
           # Newest Python without optional deps
@@ -28,7 +30,7 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Install required Debian packages
-      run: sudo apt-get -qq install xmlsec1
+      run: sudo apt-get -qq install xmlsec1 libxml2-dev libxslt-dev
 
     - name: Set up PostgreSQL ${{ matrix.postgres-version }}
       if: ${{ matrix.postgres-version }}
