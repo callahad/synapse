@@ -202,7 +202,8 @@ jobs:
       run: cat sytest-blacklist .buildkite/worker-blacklist > synapse-blacklist-with-workers
     - name: Run SyTest
       continue-on-error: true  # FIXME
-      run: /bootstrap.sh synapse
+      #run: /bootstrap.sh synapse  # Why doesn't this report failure correctly?
+      run: exit 1  # <-- Should force a failure
       working-directory: /src
 
 
