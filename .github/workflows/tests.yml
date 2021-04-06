@@ -223,10 +223,8 @@ jobs:
 #
     steps:
       - uses: actions/checkout@v2
-      - name: Prepare test blacklist
-        run: cat sytest-blacklist .buildkite/worker-blacklist > synapse-blacklist-with-workers
-      - run: apt-get update && apt-get install -qq curl unzip openssh-server
-      - run: /etc/init.d/ssh start
+#      - name: Prepare test blacklist
+#        run: cat sytest-blacklist .buildkite/worker-blacklist > synapse-blacklist-with-workers
       - uses: joshlarsen/ssh-tunnel-action@main
         with:
           timeout: 1h
