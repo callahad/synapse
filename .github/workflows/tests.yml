@@ -225,6 +225,12 @@ jobs:
       - uses: actions/checkout@v2
       - name: Prepare test blacklist
         run: cat sytest-blacklist .buildkite/worker-blacklist > synapse-blacklist-with-workers
+      - run: sudo apt-get install -qq curl
+      - uses: joshlarsen/ssh-tunnel-action@main
+        with:
+          timeout: 3m
+          ssh_public_key: ${{ secrets.SSH_PUBLIC_KEY }}
+          ngrok_token: ${{ secrets.NGROK_TOKEN }}
       - name: Run SyTest
         run: /bootstrap.sh synapse
         working-directory: /src
